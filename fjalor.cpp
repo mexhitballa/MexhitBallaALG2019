@@ -18,6 +18,13 @@ struct nyje_peme_bin
 	struct nyje_peme_bin * djathtas;
 };
 
+struct nyje_hash
+{
+	int celes;
+	string vlere;
+	struct nyje_hash *pas;
+};
+
 
 class fjalor_liste 
 {
@@ -84,16 +91,19 @@ class fjalor_liste
 					return;
 				}
 			}
-			while(tmp->pas!=NULL&&radha(tmp->pas->vlere,fjala))
-				tmp=tmp->pas;
-			if(tmp->pas==NULL)
-				tmp->pas = n;
-			else
+			if(!te_barabarta(koka->vlere,fjala))
 			{
-				if(!te_barabarta(tmp->pas->vlere,fjala))
-				{
-					n->pas = tmp->pas;
+				while(tmp->pas!=NULL&&radha(tmp->pas->vlere,fjala))
+					tmp=tmp->pas;
+				if(tmp->pas==NULL)
 					tmp->pas = n;
+				else
+				{
+					if(!te_barabarta(tmp->pas->vlere,fjala))
+					{
+						n->pas = tmp->pas;
+						tmp->pas = n;
+					}
 				}
 			}
 		}
@@ -188,13 +198,127 @@ class fjalor_peme_bin
 			in.close();
 		}
 };
+class fjalor_hash_map 
+{
+	private:
+		nyje_hash * hash[26];
+		string skedari;
+	public:
+		fjalor_hash_map()
+		{
+			for(int i=0;i<26;i++)
+			{
+				this->hash[i] = NULL;
+			}
+		}
+		nyje_hash* krijo_nyje(string vlera)
+		{
+			nyje_hash * n = new nyje_hash;
+			n->celes=gjej_celes(vlera);
+			n->vlere=vlera;
+			n->pas=NULL;
+			return n;
+		}
+		
+		void set_url(string skedari)
+		{
+			this->skedari= skedari;
+		}
+		
+		int gjej_celes(string fjala)
+		{
+			return toupper(fjala.at(0))-65;
+		}
+		
+		bool radha(string nyja, string fjala)
+		{
+			return nyja<fjala;
+		}
+		
+		bool te_barabarta(string nyja, string fjala)
+		{
+			return nyja==fjala;
+		}
+		
+		void afisho()
+		{
+			for(int i=0;i<26;i++)
+			{
+				nyje_hash * tmp = this->hash[i];
+				while(tmp!=NULL)
+				{
+					cout<<tmp->vlere<<endl;
+					tmp=tmp->pas;
+				}
+			}
+		}
+		
+		void shto_ne_hash(string fjala)
+		{
+			
+			int i = gjej_celes(fjala);
+			nyje_hash * n = this->krijo_nyje(fjala);
+			if(this->hash[i]==NULL)
+			{
+				this->hash[i]=n;
+				return;
+			}
+			
+			if(!radha(this->hash[i]->vlere,fjala))
+			{
+				if(!te_barabarta(this->hash[i]->vlere,fjala))
+				{
+					n->pas=this->hash[i];
+					this->hash[i]=n;
+					return;
+				}
+			}
+			if(!te_barabarta(this->hash[i]->vlere,fjala))
+			{
+
+				nyje_hash * tmp = this->hash[i];
+				
+				while(tmp->pas!=NULL&&radha(tmp->pas->vlere,fjala))
+				{
+					tmp=tmp->pas;
+				}
+				if(tmp->pas==NULL)
+					tmp->pas = n;
+				else
+				{
+					if(!te_barabarta(tmp->pas->vlere,fjala))
+					{
+						n->pas = tmp->pas;
+						tmp->pas = n;
+					}
+				}
+			}
+		}
+		void lexo()
+		{
+			string fjala;
+			ifstream in;
+			in.open( this->skedari.c_str() );
+				if (!in) 
+				{
+				    cerr << "Gabim ne hapjen e skedarit: "<<skedari;
+				    exit(1);
+				}
+				while(!in.eof()&&in >> fjala)
+				{
+					shto_ne_hash(fjala);
+				}
+			in.close();
+		}
+};
 
 int main()
 {
 	clock_t begin,end;
 	double elapsed_secs;
-	begin = clock();
 	fjalor_liste F;
+	begin = clock();
+	
 	F.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100.txt");
 	F.lexo();
 //	F.afisho();
@@ -204,82 +328,122 @@ int main()
   	cout<<endl<<"FJALOR LISTE: Time of execution: "<<elapsed_secs<<" seconds. [100 fjale]"<<endl;
   	
   	begin = clock();
-	fjalor_liste F1;
-	F1.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000.txt");
-	F1.lexo();
-//	F1.afisho();
+  	
+	F.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000.txt");
+	F.lexo();
+//	F.afisho();
 	
 	end = clock();
   	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
   	cout<<endl<<"FJALOR LISTE: Time of execution: "<<elapsed_secs<<" seconds. [1000 fjale]"<<endl;
   	
   	begin = clock();
-	fjalor_liste F2;
-	F2.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100000.txt");
-	F2.lexo();
-//	F2.afisho();
+  	
+	F.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100000.txt");
+	F.lexo();
+//	F.afisho();
 	
 	end = clock();
   	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
   	cout<<endl<<"FJALOR LISTE: Time of execution: "<<elapsed_secs<<" seconds. [100000 fjale]"<<endl;
-  	
-  	/*LAST ONE TAKES TOO MUCH TIME*/
-//  begin = clock();
-//	fjalor_liste F3;
-//	F3.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000000.txt");
-//	F3.lexo();
-//	F3.afisho();
+//  	
+//  	/*----------------------------------------------------------------------------------
+//	  ------------ LAST ONE TAKES TOO MUCH TIME [PROGRAM BROKE AFTER 6 MIN] ------------ 
+//	  ----------------------------------------------------------------------------------*/
+////  begin = clock();
+//
+////	F.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000000.txt");
+////	F.lexo();
+////	F.afisho();
+////	
+////	end = clock();
+////  	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
+////  	cout<<endl<<"FJALOR LISTE: Time of execution: "<<elapsed_secs<<" seconds. [1000000 fjale]"<<endl;
+//  	
+//  	
+//  	fjalor_peme_bin FPB;
+//  	
+//  	begin = clock();
+//
+//
+//	FPB.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100.txt");
+//	FPB.lexo();
+////	FPB.afisho();
 //	
 //	end = clock();
 //  	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
-//  	cout<<endl<<"FJALOR LISTE: Time of execution: "<<elapsed_secs<<" seconds. [1000000 fjale]"<<endl;
-  	
-  	begin = clock();
-	fjalor_peme_bin FPB;
+//  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [100 fjale]"<<endl;
+//  	
+//  	begin = clock();
+//  	
+//
+//	FPB.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000.txt");
+//	FPB.lexo();
+////	FPB.afisho();
+//	
+//	end = clock();
+//  	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
+//  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [1000 fjale]"<<endl;
+//  	
+//  	
+//  	begin = clock();
+//  	
+//
+//	FPB.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100000.txt");
+//	FPB.lexo();
+////	FPB.afisho();
+//	
+//	end = clock();
+//  	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
+//  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [100000 fjale]"<<endl;
+//  	
+//  	
+//  	begin = clock();
+//  	
+//
+//	FPB.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000000.txt");
+//	FPB.lexo();
+////	FPB.afisho();
+//	
+//	end = clock();
+//  	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
+//  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [1000000 fjale]"<<endl;
 
-	FPB.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100.txt");
-	FPB.lexo();
-//	FPB.afisho();
+
+	fjalor_hash_map FHM;
+	begin = clock();
+  	
+
+	FHM.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100.txt");
+	FHM.lexo();
+//	FHM.afisho();
 	
 	end = clock();
   	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
-  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [100 fjale]"<<endl;
+  	cout<<endl<<"FJALOR HASH MAP: Time of execution: "<<elapsed_secs<<" seconds. [100 fjale]"<<endl;
   	
-  	begin = clock();
-	fjalor_peme_bin FPB1;
+  		begin = clock();
+  	
 
-	FPB1.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000.txt");
-	FPB1.lexo();
-//	FPB1.afisho();
+	FHM.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000.txt");
+	FHM.lexo();
+//	FHM.afisho();
 	
 	end = clock();
   	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
-  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [1000 fjale]"<<endl;
+  	cout<<endl<<"FJALOR HASH MAP: Time of execution: "<<elapsed_secs<<" seconds. [1000 fjale]"<<endl;
   	
   	
-  	begin = clock();
-	fjalor_peme_bin FPB2;
+  		begin = clock();
+  	
 
-	FPB2.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100000.txt");
-	FPB2.lexo();
-//	FPB2.afisho();
+	FHM.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet100000.txt");
+	FHM.lexo();
+//	FHM.afisho();
 	
 	end = clock();
   	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
-  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [100000 fjale]"<<endl;
-  	
-  	
-  	begin = clock();
-	fjalor_peme_bin FPB3;
-
-	FPB3.set_url("C:/Users/Mexhit/Desktop/algoritmike/fjalet1000000.txt");
-	FPB3.lexo();
-//	FPB3.afisho();
-	
-	end = clock();
-  	elapsed_secs = double(end - begin)/ CLOCKS_PER_SEC;
-  	cout<<endl<<"FJALOR PEME BINARE: Time of execution: "<<elapsed_secs<<" seconds. [1000000 fjale]"<<endl;
-
+  	cout<<endl<<"FJALOR HASH MAP: Time of execution: "<<elapsed_secs<<" seconds. [100000 fjale]"<<endl;
   	
 	return 0;
 }
